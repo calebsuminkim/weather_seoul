@@ -1,0 +1,5 @@
+apache-airflow
+pendulum
+lxml
+beautifulsoup4
+apache-airflow-providers-mysql

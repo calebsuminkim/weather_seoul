@@ -1,0 +1,33 @@
+import pendulum
+from airflow.sdk import DAG
+from airflow.providers.standard.operators.python import PythonOperator
+
+with DAG(
+    dag_id='dags_python_with_postgres_hook',
+    start_date=pendulum.datetime(2025, 11, 21, tz='Asia/Seoul'),
+    schedule=None,
+    catchup=False
+) as dag:
+
+    def insrt_postgres(postgres_conn_id, **kwargs):
+        # import psycopg2
+        from contextlib import closing
+        from airflow.providers.postgres.hooks.postgres import PostgresHook
+        postgres_hook = PostgresHook(postgres_conn_id)
+        with closing(postgres_hook.get_conn()) as conn:
+            with closing(conn.cursor()) as cursor:
+                dag_id = kwargs.get('ti').dag_id
+                task_id = kwargs.get('ti').task_id
+                run_id = kwargs.get('ti').run_id
+                msg = 'Hook insert 수행'
+                sql = 'INSERT INTO py_opr_drct_insrt VALUES (%s, %s, %s, %s);'
+                cursor.execute(sql, (dag_id, task_id, run_id, msg))
+                conn.commit()
+
+    insrt_postgres = PythonOperator(
+        task_id='insrt_postgres',
+        python_callable=insrt_postgres,
+        op_kwargs={'postgres_conn_id':'conn-postgres-for-weather'}
+    )
+
+    insrt_postgres

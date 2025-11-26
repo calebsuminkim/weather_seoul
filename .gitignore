@@ -1,0 +1,11 @@
+.DS_Store
+.env
+.idea
+dags/__pycache__
+config
+docker-compose.yaml
+docker-compose.yaml.251118
+Dockerfile_pre
+files
+logs
+venv
